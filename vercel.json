@@ -4,7 +4,8 @@
     { "src": "index.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/avatar/(.*)", "dest": "/index.js" },
-    { "src": "/gamepasses/(.*)", "dest": "/index.js" }
+    { "src": "/items/(.*)", "dest": "/index.js" },
+    { "src": "/gamepasses/(.*)", "dest": "/index.js" },
+    { "src": "/avatar/(.*)", "dest": "/index.js" }
   ]
 }
