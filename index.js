@@ -5,42 +5,52 @@ import cors from "cors";
 const app = express();
 app.use(cors());
 
-const PORT = process.env.PORT || 3000;
+const API_KEY = process.env.ROBLOX_API_KEY;
 
-// Fetch gamepasses
-app.get("/gamepasses/:userId", async (req, res) => {
+// Gamepasses endpoint
+app.get("/gamepasses/:universeId", async (req, res) => {
+  const universeId = req.params.universeId;
+  const url = `https://apis.roblox.com/game-passes/v1/universes/${universeId}/game-passes?passView=Full&pageSize=100`;
+
   try {
-    const userId = req.params.userId;
-    // Replace with actual Roblox API URL
-    const url = `https://apis.roblox.com/game-passes/v1/universes/${userId}/game-passes/creator`;
-    const response = await fetch(url);
-    if (!response.ok) return res.status(response.status).send({ error: "Failed to fetch gamepasses" });
-    const data = await response.json();
-    // Format like your previous script expects
-    const gamePasses = (data.gamePasses || []).map(pass => ({
-      id: pass.gamePassId,
-      name: pass.name,
-      price: pass.priceInformation?.defaultPriceInRobux || 0
-    }));
-    res.json({ gamePasses });
+    const resp = await fetch(url, {
+      headers: { "x-api-key": API_KEY },
+    });
+    const data = await resp.json();
+
+    if (!resp.ok) {
+      return res.status(resp.status).json({ error: data, status: resp.status });
+    }
+
+    // Map to what your game expects
+    const passes = (data.gamePasses || []).map(p => {
+      return {
+        id: p.gamePassId,
+        name: p.name,
+        price: p.priceInformation?.defaultPriceInRobux ?? 0
+      };
+    });
+
+    return res.json({ gamePasses: passes });
   } catch (err) {
-    res.status(500).send({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 });
 
-// Fetch avatar assets
+// (avatar part unchanged)
 app.get("/avatar/:userId", async (req, res) => {
+  // your avatar logic
+  const userId = req.params.userId;
+  const url = `https://avatar.roblox.com/v1/users/${userId}/currently-wearing`;
   try {
-    const userId = req.params.userId;
-    const url = `https://avatar.roblox.com/v1/users/${userId}/currently-wearing`;
-    const response = await fetch(url);
-    if (!response.ok) return res.status(response.status).send({ error: "Failed to fetch avatar" });
-    const data = await response.json();
-    // Return the IDs of currently worn assets
-    res.json({ items: data.assetIds || [] });
-  } catch (err) {
-    res.status(500).send({ error: err.message });
+    const r = await fetch(url);
+    const d = await r.json();
+    return res.json({ items: d.assetIds || [] });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 });
 
-app.listen(PORT, () => console.log(`Proxy running on port ${PORT}`));
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Proxy running");
+});
