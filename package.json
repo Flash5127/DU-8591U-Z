@@ -1,0 +1,12 @@
+{
+  "name": "roblox-proxy-vercel",
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": "18.x"
+  },
+  "dependencies": {
+    "lru-cache": "^10.0.0",
+    "node-fetch": "^2.6.7"
+  }
+}
